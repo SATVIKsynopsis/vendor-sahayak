@@ -1,0 +1,88 @@
+import winston from 'winston';
+import moment from 'moment-timezone';
+
+// Define log levels
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  debug: 4,
+};
+
+// Define log colors
+const colors = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  http: 'magenta',
+  debug: 'white',
+};
+
+winston.addColors(colors);
+
+// Custom format for timestamps
+const timestampFormat = winston.format.timestamp({
+  format: () => moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss'),
+});
+
+// Custom format for console output
+const consoleFormat = winston.format.combine(
+  winston.format.colorize({ all: true }),
+  timestampFormat,
+  winston.format.errors({ stack: true }),
+  winston.format.printf(({ timestamp, level, message, stack }) => {
+    return `${timestamp} [${level}]: ${stack || message}`;
+  })
+);
+
+// Custom format for file output
+const fileFormat = winston.format.combine(
+  timestampFormat,
+  winston.format.errors({ stack: true }),
+  winston.format.json()
+);
+
+// Define transports
+const transports = [
+  // Console transport
+  new winston.transports.Console({
+    format: consoleFormat,
+  }),
+  
+  // File transport for error logs
+  new winston.transports.File({
+    filename: 'logs/error.log',
+    level: 'error',
+    format: fileFormat,
+    maxsize: 5242880, // 5MB
+    maxFiles: 5,
+  }),
+  
+  // File transport for all logs
+  new winston.transports.File({
+    filename: 'logs/combined.log',
+    format: fileFormat,
+    maxsize: 5242880, // 5MB
+    maxFiles: 5,
+  }),
+];
+
+// Create logger instance
+export const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  levels,
+  transports,
+  exitOnError: false,
+  handleExceptions: true,
+  handleRejections: true,
+});
+
+// Create stream for Morgan HTTP logging
+export const morganStream = {
+  write: (message: string) => {
+    logger.http(message.trim());
+  },
+};
+
+export default logger;
