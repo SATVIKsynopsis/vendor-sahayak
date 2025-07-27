@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { authApi } from '@/services/api';
@@ -11,7 +11,7 @@ interface OTPFormData {
   otp: string;
 }
 
-export default function OTPVerificationPage() {
+function OTPVerificationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -253,5 +253,27 @@ export default function OTPVerificationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading component for Suspense fallback
+function OTPLoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function OTPVerificationPage() {
+  return (
+    <Suspense fallback={<OTPLoadingFallback />}>
+      <OTPVerificationContent />
+    </Suspense>
   );
 }
