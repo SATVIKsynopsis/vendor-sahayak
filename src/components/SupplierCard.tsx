@@ -1,13 +1,22 @@
 'use client';
 
 import { Phone, Mail, MapPin, Star, Shield, Award, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Supplier } from '@/types';
 
 interface SupplierCardProps {
   supplier: Supplier;
+  isHindi?: boolean;
 }
 
-export default function SupplierCard({ supplier }: SupplierCardProps) {
+export default function SupplierCard({ supplier, isHindi = false }: SupplierCardProps) {
+  const router = useRouter();
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/supplier/${supplier.id}`);
+  };
+
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -99,7 +108,9 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
           </div>
           <div className="flex-shrink-0 ml-4">
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriceRangeColor(supplier.priceRange)}`}>
-              {supplier.priceRange} Price
+              {supplier.priceRange === 'Low' ? (isHindi ? 'कम मूल्य' : 'Low Price') :
+               supplier.priceRange === 'Medium' ? (isHindi ? 'मध्यम मूल्य' : 'Medium Price') :
+               (isHindi ? 'उच्च मूल्य' : 'High Price')}
             </span>
           </div>
         </div>
@@ -113,7 +124,7 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
             {supplier.rating}
           </span>
           <span className="text-sm text-gray-500">
-            ({supplier.totalReviews} reviews)
+            ({supplier.totalReviews} {isHindi ? 'समीक्षाएं' : 'reviews'})
           </span>
         </div>
 
@@ -124,7 +135,9 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
 
         {/* Products */}
         <div className="mb-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Products:</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
+            {isHindi ? 'उत्पाद:' : 'Products:'}
+          </h4>
           <div className="flex flex-wrap gap-1">
             {supplier.products.slice(0, 3).map((product, index) => (
               <span
@@ -136,7 +149,7 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
             ))}
             {supplier.products.length > 3 && (
               <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                +{supplier.products.length - 3} more
+                +{supplier.products.length - 3} {isHindi ? 'और' : 'more'}
               </span>
             )}
           </div>
@@ -152,7 +165,7 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
                 aria-label={`Call ${supplier.name}`}
               >
                 <Phone className="h-4 w-4 mr-2" />
-                Call
+                {isHindi ? 'कॉल करें' : 'Call'}
               </a>
               {supplier.contactInfo.email && (
                 <a
@@ -161,12 +174,15 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
                   aria-label={`Email ${supplier.name}`}
                 >
                   <Mail className="h-4 w-4 mr-2" />
-                  Email
+                  {isHindi ? 'ईमेल करें' : 'Email'}
                 </a>
               )}
             </div>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-              View Details
+            <button 
+              onClick={handleViewDetails}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              {isHindi ? 'विवरण देखें' : 'View Details'}
             </button>
           </div>
         </div>
@@ -176,7 +192,7 @@ export default function SupplierCard({ supplier }: SupplierCardProps) {
           <div className="mt-4 pt-4 border-t">
             <details className="group">
               <summary className="flex items-center cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">
-                <span>Certification Details</span>
+                <span>{isHindi ? 'प्रमाणन विवरण' : 'Certification Details'}</span>
                 <svg className="ml-2 h-4 w-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
